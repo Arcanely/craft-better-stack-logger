@@ -1,0 +1,124 @@
+{# @var plugin \arcanewebdesign\craftbetterstacklogger\BetterStackLogger #}
+{# @var settings \arcanewebdesign\craftbetterstacklogger\models\Settings #}
+
+{% import "_includes/forms" as forms %}
+{% import _self as self %}
+
+{{ forms.autosuggestfield({
+    label: 'Source Token',
+    id: 'sourceToken',
+    name: 'sourceToken',
+    suggestEnvVars: false,
+    required: true,
+    value: settings['sourceToken'],
+    warning: self.configWarning('sourceToken', 'better-stack-logger'),
+    first: true
+}) }}
+
+{{ forms.lightswitchField({
+    label:        "Enabled",
+    id:           'enabled',
+    name:         'enabled',
+    on:           settings['enabled'],
+    warning: self.configWarning('enabled', 'better-stack-logger')
+}) }}
+
+{{ forms.hidden({
+    id: 'levels',
+    name: 'levels[]',
+}) }}
+
+{{ forms.checkboxSelectField({
+    label: "Included log levels",
+    instructions: "What logging levels do you want to send to Better Stack?" ,
+    id: 'levels',
+    name: 'levels',
+    options: [
+        { label: "Error", value: 'error' },
+        { label: "Warning", value: 'warning' },
+    ],
+    values: settings.levels,
+    required: true,
+    errors: settings.getErrors('levels'),
+    warning: 'levels' in overrides |keys ? self.configWarning('levels', 'better-stack-logger'),
+}) }}
+
+{{ forms.hidden({
+    id: 'logVars',
+    name: 'logVars[]',
+}) }}
+
+{{ forms.checkboxSelectField({
+    label: "Included log vars",
+    instructions: "What log vars do you want to send to Better Stack?" ,
+    id: 'logVars',
+    name: 'logVars',
+    options: [
+        { label: "_GET", value: '_GET' },
+        { label: "_POST", value: '_POST' },
+        { label: "_SERVER", value: '_SERVER' },
+        { label: "_FILES", value: '_FILES' },
+        { label: "_COOKIE", value: '_COOKIE' },
+        { label: "_SESSION", value: '_SESSION' },
+    ],
+    values: settings.logVars,
+    required: true,
+    errors: settings.getErrors('logVars'),
+    warning: 'logVars' in overrides |keys ? self.configWarning('logVars', 'better-stack-logger'),
+}) }}
+
+{{ forms.textField({
+    label: "Excluded HTTP status codes",
+    instructions: "Comma separated list of HTTP status codes that should not be sent to Better Stack.",
+    id: 'exceptCodes',
+    name: 'exceptCodes[]',
+    placeholder: '403, 404',
+    value: settings.exceptCodes | join(', '),
+    errors: settings.getErrors('exceptCodes'),
+    warning: 'exceptCodes' in overrides |keys ? self.configWarning('exceptCodes', 'better-stack-logger'),
+}) }}
+
+
+
+
+{% macro configWarning(setting, file) -%}
+    {%- set configArray = craft.app.config.getConfigFromFile(file) -%}
+    {%- if configArray[setting] is defined -%}
+        {{ "This is being overridden by the \"" ~ setting ~ "\" config setting."|raw }}
+    {%- else -%}
+        {{ false }}
+    {%- endif -%}
+{%- endmacro %}
+
+{% if settings.enabled %}
+    <button class="btn"
+            type="button"
+            {% if not settings.enabled %}disabled{% endif %}
+            onclick="(()=>{
+                    fetch('{{ url('better-stack-logger/send-test-log') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': '{{ craft.app.request.csrfToken }}', // Add CSRF token for security
+                        },
+                        body: JSON.stringify({}) // Send empty data or whatever is needed
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Handle the response here
+                        if (data.success) {
+                            alert('Test log sent successfully!');
+                            // console.log(JSON.stringify(data.targets));
+                        } else {
+                            alert('Failed to send the test log.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error sending test log:', error);
+                        alert('Error sending test log.');
+                        });
+                    })()
+    ">
+        Send Test Log
+    </button>
+{% endif %}

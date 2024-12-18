@@ -1,0 +1,52 @@
+{
+  "name": "arcane-web-design/craft-better-stack-logger",
+  "description": "Send logs to BetterStack Log tailing service.",
+  "type": "craft-plugin",
+  "license": "MIT",
+  "version": "1.0.0",
+  "authors": [
+	{
+		"name": "Arcane Web Design",
+		"homepage": "https://www.arcane-web-design.com"
+	}
+  ],
+  "support": {
+    "email": "hello@arcane-web-design.com"
+  },
+  "require": {
+    "php": ">=8.2",
+    "craftcms/cms": "^5.5.0",
+    "ext-curl": "*"
+  },
+  "require-dev": {
+    "craftcms/ecs": "dev-main",
+    "craftcms/phpstan": "dev-main"
+  },
+  "autoload": {
+    "psr-4": {
+      "arcanewebdesign\\craftbetterstacklogger\\": "src/"
+    }
+  },
+  "extra": {
+    "handle": "better-stack-logger",
+    "name": "Better Stack Logger",
+    "developer": "Nick Adams (Arcane Web Design)",
+    "documentationUrl": "https://github.com/Arcanely/craft-better-stack-logger",
+    "class": "arcanewebdesign\\craftbetterstacklogger\\BetterStackLogger"
+  },
+  "scripts": {
+    "check-cs": "ecs check --ansi",
+    "fix-cs": "ecs check --ansi --fix",
+    "phpstan": "phpstan --memory-limit=1G"
+  },
+  "config": {
+    "sort-packages": true,
+    "platform": {
+      "php": "8.2"
+    },
+    "allow-plugins": {
+      "yiisoft/yii2-composer": true,
+      "craftcms/plugin-installer": true
+    }
+  }
+}
